@@ -46,7 +46,6 @@ var app = (function () {
     };
 
 
-
     return {
 
         init: function () {
@@ -54,22 +53,25 @@ var app = (function () {
 
             //websocket connection
             connectAndSubscribe();
-            canvas.addEventListener('mousemove', function (evt) {
-                var mousePos = getMousePos(canvas, evt);
-                var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
-                writeMessage(canvas, message);
-            }, false);
+
+            can.addEventListener("click", function(evt){
+                var mousePosition = getMousePosition(evt);
+                app.publishPoint(mousePosition.x, mousePosition.y);
+            });
+            
         },
 
         publishPoint: function (px, py) {
             var pt = new Point(px, py);
             console.info("publishing point at " + pt);
-            addPointToCanvas(pt);
+            
+            //addPointToCanvas(pt);
 
             //publicar el evento
 
             //creando un objeto literal
             //stompClient.send("/topic/newpoint", {}, JSON.stringify({x: 10, y: 10}));
+
             //enviando un objeto creado a partir de una clase
             stompClient.send("/topic/newpoint", {}, JSON.stringify(pt));
         },
