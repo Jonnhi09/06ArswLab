@@ -8,6 +8,8 @@ var app = (function () {
     }
 
     var stompClient = null;
+    var room = null;
+    var can = null;
 
     var addPointToCanvas = function (point) {
         var canvas = document.getElementById("canvas");
@@ -36,7 +38,7 @@ var app = (function () {
         //subscribe to /topic/TOPICXX when connections succeed
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint', function (eventbody) {
+            stompClient.subscribe('/topic/newpoint.'+room, function (eventbody) {
                 var point = JSON.parse(eventbody.body);
                 addPointToCanvas(point);
                 //alert(point.x + " , " + point.y);
@@ -49,31 +51,49 @@ var app = (function () {
     return {
 
         init: function () {
-            var can = document.getElementById("canvas");
+            can = document.getElementById("canvas");
 
             //websocket connection
-            connectAndSubscribe();
+            //connectAndSubscribe();
 
-            can.addEventListener("click", function(evt){
+            /*if(stompClient!=null) {
+                can.addEventListener("click", function(evt){
                 var mousePosition = getMousePosition(evt);
                 app.publishPoint(mousePosition.x, mousePosition.y);
-            });
-            
+                });
+            }*/
         },
 
         publishPoint: function (px, py) {
-            var pt = new Point(px, py);
-            console.info("publishing point at " + pt);
-            
-            //addPointToCanvas(pt);
+            if(stompClient!=null) {
+                var pt = new Point(px, py);
+                console.info("publishing point at " + pt);
 
-            //publicar el evento
+                //addPointToCanvas(pt);
 
-            //creando un objeto literal
-            //stompClient.send("/topic/newpoint", {}, JSON.stringify({x: 10, y: 10}));
+                //publicar el evento
 
-            //enviando un objeto creado a partir de una clase
-            stompClient.send("/topic/newpoint", {}, JSON.stringify(pt));
+                //creando un objeto literal
+                //stompClient.send("/topic/newpoint", {}, JSON.stringify({x: 10, y: 10}));
+
+                //enviando un objeto creado a partir de una clase
+                stompClient.send("/topic/newpoint."+room, {}, JSON.stringify(pt));
+            } else {
+                alert("Para enviar puntos primero debe conectarse a una sala!");
+            }
+        },
+
+        connectSuscribe: function(r) {
+            if(!isNaN(parseInt(r))){
+                room = r;
+                connectAndSubscribe();
+                can.addEventListener("click", function(evt){
+                var mousePosition = getMousePosition(evt);
+                app.publishPoint(mousePosition.x, mousePosition.y);
+                });
+            } else {
+                alert("Debe ingresar un número de sala válido");
+            }
         },
 
         disconnect: function () {
