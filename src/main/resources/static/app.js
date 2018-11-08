@@ -43,6 +43,11 @@ var app = (function () {
                 addPointToCanvas(point);
                 //alert(point.x + " , " + point.y);
             });
+            stompClient.subscribe('/topic/newpolygon.'+room, function (eventbody) {
+                var point = JSON.parse(eventbody.body);
+                //addPointToCanvas(point);
+                alert(point.x + " , " + point.y);
+            });
         });
 
     };
@@ -56,12 +61,6 @@ var app = (function () {
             //websocket connection
             //connectAndSubscribe();
 
-            /*if(stompClient!=null) {
-                can.addEventListener("click", function(evt){
-                var mousePosition = getMousePosition(evt);
-                app.publishPoint(mousePosition.x, mousePosition.y);
-                });
-            }*/
         },
 
         publishPoint: function (px, py) {
@@ -77,7 +76,7 @@ var app = (function () {
                 //stompClient.send("/topic/newpoint", {}, JSON.stringify({x: 10, y: 10}));
 
                 //enviando un objeto creado a partir de una clase
-                stompClient.send("/topic/newpoint."+room, {}, JSON.stringify(pt));
+                stompClient.send("/app/newpoint."+room, {}, JSON.stringify(pt));
             } else {
                 alert("Para enviar puntos primero debe conectarse a una sala!");
             }
@@ -88,8 +87,8 @@ var app = (function () {
                 room = r;
                 connectAndSubscribe();
                 can.addEventListener("click", function(evt){
-                var mousePosition = getMousePosition(evt);
-                app.publishPoint(mousePosition.x, mousePosition.y);
+                    var mousePosition = getMousePosition(evt);
+                    app.publishPoint(mousePosition.x, mousePosition.y);
                 });
             } else {
                 alert("Debe ingresar un número de sala válido");
