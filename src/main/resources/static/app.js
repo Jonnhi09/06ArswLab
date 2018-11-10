@@ -8,8 +8,25 @@ var app = (function () {
     }
 
     var stompClient = null;
+    var eventMouse = null;
     var room = null;
     var can = null;
+    var polygon = 3;
+    var colors = ["Aqua", "BlueViolet", "Brown", "DarkMagenta", "DeepPink", "OrangeRed"];
+
+    var addPolygonToCanvas = function polygon(vertices) {
+    	var canvas = document.getElementById("canvas");
+    	var ctx = canvas.getContext("2d");
+    	ctx.beginPath();
+    	ctx.moveTo(vertices[0].x, vertices[0].y);
+    	for (var i = 1; i < vertices.length; i++){
+    		ctx.lineTo(vertices[i].x, vertices[i].y);
+    	}
+    	ctx.closePath();
+    	ctx.stroke();
+    	ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+    	ctx.fill();
+	}
 
     var addPointToCanvas = function (point) {
         var canvas = document.getElementById("canvas");
@@ -38,18 +55,15 @@ var app = (function () {
         //subscribe to /topic/TOPICXX when connections succeed
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint.'+room, function (eventbody) {
+            stompClient.subscribe('/topic/newpoint.' + room, function (eventbody) {
                 var point = JSON.parse(eventbody.body);
                 addPointToCanvas(point);
                 //alert(point.x + " , " + point.y);
             });
-            stompClient.subscribe('/topic/newpolygon.'+room, function (eventbody) {
-                var point = JSON.parse(eventbody.body);
-                //addPointToCanvas(point);
-                alert(point.x + " , " + point.y);
+            stompClient.subscribe('/topic/newpolygon.' + room, function (eventbody) {
+                addPolygonToCanvas(JSON.parse(eventbody.body));
             });
         });
-
     };
 
 
@@ -64,7 +78,7 @@ var app = (function () {
         },
 
         publishPoint: function (px, py) {
-            if(stompClient!=null) {
+            if (stompClient != null) {
                 var pt = new Point(px, py);
                 console.info("publishing point at " + pt);
 
@@ -76,19 +90,21 @@ var app = (function () {
                 //stompClient.send("/topic/newpoint", {}, JSON.stringify({x: 10, y: 10}));
 
                 //enviando un objeto creado a partir de una clase
-                stompClient.send("/app/newpoint."+room, {}, JSON.stringify(pt));
+                stompClient.send("/app/newpoint." + room, {}, JSON.stringify(pt));
             } else {
                 alert("Para enviar puntos primero debe conectarse a una sala!");
             }
         },
 
-        connectSuscribe: function(r) {
-            if(!isNaN(parseInt(r))){
+        connectSuscribe: function (r) {
+            if (!isNaN(parseInt(r))) {
+            	document.getElementById("btnConnect").disabled=true;
+            	document.getElementById("btnDisconnect").disabled=false;
                 room = r;
                 connectAndSubscribe();
-                can.addEventListener("click", function(evt){
-                    var mousePosition = getMousePosition(evt);
-                    app.publishPoint(mousePosition.x, mousePosition.y);
+                can.addEventListener("click", eventMouse = function eventMouse (evt) {
+                	var mousePosition = getMousePosition(evt);
+					app.publishPoint(mousePosition.x, mousePosition.y);
                 });
             } else {
                 alert("Debe ingresar un número de sala válido");
@@ -98,8 +114,13 @@ var app = (function () {
         disconnect: function () {
             if (stompClient !== null) {
                 stompClient.disconnect();
+                stompClient = null;
+                document.getElementById("btnConnect").disabled=false;
+                document.getElementById("btnDisconnect").disabled=true;
+                can.getContext('2d').clearRect(0, 0, can.width, can.height);
+                can.removeEventListener("click", eventMouse); 
             }
-            setConnected(false);
+            //setConnected(false);
             console.log("Disconnected");
         }
     };

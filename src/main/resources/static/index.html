@@ -17,24 +17,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <html>
     <head>
-        <title>TODO supply a title</title>
+        <title>Dibujo Web</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="/webjars/jquery/jquery.min.js"></script>
         <script src="/webjars/sockjs-client/sockjs.min.js"></script>
         <script src="/webjars/stomp-websocket/stomp.min.js"></script>
         <script src="/app.js"></script>
-
     </head>
 
-
-    
     <body onload="app.init()">
         X:<input id="x" type="number"/>
         Y:<input id="y" type="number"/>        
-        <button onclick="app.publishPoint($('#x').val(),$('#y').val())">Send point</button>
+        <button onclick="app.publishPoint($('#x').val(), $('#y').val())">Send point</button>
+        Type of polygon:<input type="radio" name="polygon" value="4" checked> 4
+        <input type="radio" name="polygon" value="5" disabled> 5 <br>
+        <input type="radio" name="polygon" value="6" disabled> 6 <br>
         Room:<input id="room" type="number"/>
-        <button onclick="app.connectSuscribe($('#room').val())">Connect</button>
+        <button id="btnConnect" onclick="app.connectSuscribe($('#room').val())">Connect</button>
+        <button id="btnDisconnect" disabled onclick="app.disconnect()">Disconnect</button><br>
         <canvas id="canvas" width="800" height="600" style="border:2px solid #7a00ff;"></canvas>
+        <h3>Para esta versión de la aplicación sólo se usan polígonos de más de 3 vértices, en futuros<br>
+            trabajos se podría permitir el uso de direntes polígonos al mismo tiempo.
+        </h3>
     </body>
 </html>
