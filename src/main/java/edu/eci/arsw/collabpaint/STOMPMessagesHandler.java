@@ -27,6 +27,12 @@ public class STOMPMessagesHandler {
     @Autowired
     SimpMessagingTemplate msgt;
 
+    /**
+     * Se usa synchronized en el siguiente metodo, para evitar las condiciones.
+     * @param pt
+     * @param numdibujo
+     * @throws Exception
+     */
     @MessageMapping("/newpoint.{numdibujo}")
     public synchronized void handlePointEvent(Point pt, @DestinationVariable String numdibujo) throws Exception {
         
